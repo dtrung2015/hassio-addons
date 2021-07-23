@@ -139,7 +139,22 @@ class GoogleTextAssistant(object):
                 text_response = resp.dialog_state_out.supplemental_display_text()
         return text_response, html_response
 
+def start_server():
+    app.run(host='0.0.0.0',port=5001)
+
+def main():
+        class tts(Resource):
+            def get(self):
+                message = request.args.get('message', default = 'This is a test!')
+                say(message)
+                return {'status': 'OK'}
+        api.add_resource(tts, '/tts')
+        server = threading.Thread(target=start_server,args=())
+        server.setDaemon(True)
+        server.start()
+
 if __name__ == '__main__':
+    main() 
     global assistant
 
     cred_json = Path(sys.argv[1])
@@ -160,19 +175,3 @@ if __name__ == '__main__':
     assistant = GoogleTextAssistant('vi-VN', 'HA_GA', 'HA_GA_TEXT_SERVER',
                              True, grpc_channel, DEFAULT_GRPC_DEADLINE)
     app.run(host='0.0.0.0')
-def start_server():
-    app.run(host='0.0.0.0',port=5001)
-
-def main():
-        class tts(Resource):
-            def get(self):
-                message = request.args.get('message', default = 'This is a test!')
-                say(message)
-                return {'status': 'OK'}
-        api.add_resource(tts, '/tts')
-        server = threading.Thread(target=start_server,args=())
-        server.setDaemon(True)
-        server.start()
-
-if __name__ == '__main__':
-    main()
