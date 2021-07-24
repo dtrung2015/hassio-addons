@@ -52,6 +52,20 @@ class Command(Resource):
 
 api.add_resource(Command, '/command')
 
+class tts(Resource):
+    def get(self):
+        message = request.args.get('message', default = 'This is a test!')
+        say(message)
+        return {'status': 'OK'}
+api.add_resource(tts, '/tts')
+server = threading.Thread(target=start_server,args=())
+server.setDaemon(True)
+server.start()
+
+
+
+
+
 
 class GoogleTextAssistant(object):
     """Sample Assistant that supports text based conversations.
