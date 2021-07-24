@@ -1,23 +1,48 @@
-from actions import say
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from flask import Flask, request
-from flask_restful import Resource, Api
-import threading
+from flask import render_template
+import json
+import datetime
+import os
+from termcolor import colored
+import time
+import tts
+
 app = Flask(__name__)
-api = Api(app)
 
-def start_server():
-    app.run(host='0.0.0.0',port=5001)
+@app.route('/')
+def my_form():
+    return render_template('my-form.html')
 
-def main():
-        class tts(Resource):
-            def get(self):
-                message = request.args.get('message', default = 'This is a test!')
-                say(message)
-                return {'status': 'OK'}
-        api.add_resource(tts, '/tts')
-        server = threading.Thread(target=start_server,args=())
-        server.setDaemon(True)
-        server.start()
+@app.route('/', methods=['POST'])
+def my_form_post():
+    text = request.form['text']
+    processed_text = text.lower()    
+    try:
+        tts.tts_vietnamese(True,text)
+        speak_result = 'Not OK'
+    except:
+        speak_result = 'Not OK'
+    return render_template('my-form.html')
+
+
+@app.route('/webhook', methods=['POST'])
+def speaking():
+    """
+    Send a POST request to localhost:5000/webhook with a JSON body with a "p" key
+    to print that message in the server console.
+    """
+    payload = request.get_json()
+    text=payload['data']
+    speak_result =''
+    try:
+        tts.tts_vietnamese(True,text)
+        speak_result = 'Not OK'
+    except:
+        speak_result = 'Not OK'
+    return speak_result
 
 if __name__ == '__main__':
-    main()
+    app.run(debug=True, use_reloader=True)
